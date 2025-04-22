@@ -19,7 +19,7 @@ class Human(Player):
     
     def make_choice(self, choices):
         while True:
-            choice = input("Enter you choice (rock/paper/scissor)")
+            choice = input("Enter your choice (rock/paper/scissor/lizard/spock): ")
             if choice in choices:
                 return choice
             
@@ -36,11 +36,13 @@ class Computer(Player):
 
 class Game:
     def __init__(self):
-        self.choices = ["rock", "paper", "scissor"]
+        self.choices = ["rock", "paper", "scissor", "lizard", "spock"]
         self.rules = {
-            "rock": "scissor",
-            "scissor": "paper",
-            "paper": "rock"
+            "rock": ["scissor", "lizard"],
+            "scissor": ["paper", "lizard"],
+            "paper": ["rock", "spock"],
+            "lizard": ["spock", "paper"],
+            "spock": ["scissor", "rock"]
         }
         self.human_player = None
         self.computer_player = Computer()
@@ -49,11 +51,11 @@ class Game:
     
     def display_welcome_message(self):
         print("""
-            Welcome to RPS game. Win 3 times to be a champion.
+            Welcome to RPSLS game (Rock, Paper, Scissor, Lizard, Spock). Win 3 times to be a champion.
         """)
     
     def create_human_player(self):
-        player_name = input("Please input your name")
+        player_name = input("Please input your name: ")
         self.human_player = Human(player_name)
     
     def play_round(self):
@@ -62,13 +64,13 @@ class Game:
         computer_choice = self.computer_player.make_choice(self.choices)
         human_choice = self.human_player.make_choice(self.choices)
 
-        print(f"Computer choice : {computer_choice}")
-        print(f"Human choice : {human_choice}")
+        print(f"Computer choice: {computer_choice}")
+        print(f"Human choice: {human_choice}")
 
-        if self.rules[computer_choice] == human_choice:
+        if human_choice in self.rules[computer_choice]:
             self.computer_player.increment_score()
             print("Computer wins")
-        elif self.rules[human_choice] == computer_choice:
+        elif computer_choice in self.rules[human_choice]:
             self.human_player.increment_score()
             print("Human wins")
         else:
@@ -90,8 +92,8 @@ class Game:
             return False
 
     def play_again(self):
-        ans = input("Play again ? (Y/N)")
-        return ans == "Y" or ans == "y" == ""
+        ans = input("Play again? (Y/N): ")
+        return ans.lower() in ["y", "yes"]
     
     def reset_game(self):
         self.computer_player.reset_score()
@@ -105,15 +107,15 @@ class Game:
 
         while True:
             self.play_round()
+
             if self.check_winner():
-                if self.play_again():
-                    self.reset_game()
-                else:
+                if not self.handle_play_again():
                     print("Good Bye!")
-                    return
-            pass
-        pass
-    pass
+                    break
+                self.reset_game()
+
+    def handle_play_again(self):
+        return self.play_again()
 
 game = Game()
 game.start_game()
